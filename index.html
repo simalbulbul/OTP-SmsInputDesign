@@ -1,0 +1,126 @@
+<style>
+    .container {
+        text-align: center;
+    }
+
+    .otp-wrapper {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .otp-input {
+        width: 55px;
+        height: 65px;
+        font-size: 24px;
+        text-align: center;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        outline: none;
+        transition: 0.2s;
+    }
+
+    .otp-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+        transform: scale(1.05);
+    }
+
+    button {
+        padding: 10px 25px;
+        border: none;
+        border-radius: 8px;
+        background: #007bff;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #0056b3;
+    }
+</style>
+
+<div class="container">
+    <div id="codeBoxContainer"></div>
+    <button onclick="verifyCode()">Kodu Doğrula</button>
+</div>
+
+<script>
+    function createOtpInputs(containerId, kutuSayisi = 6) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "otp-wrapper";
+
+        let kutu = [];
+
+        for (let i = 0; i < kutuSayisi; i++) {
+            const input = document.createElement("input");
+            input.type = "text";
+            input.maxLength = 1;
+            input.className = "otp-input";
+
+            input.addEventListener("input", (e) => {
+                let value = e.target.value.replace(/[^0-9]/g, "");
+                e.target.value = value;
+
+                if (value && i < kutuSayisi - 1) {
+                    kutu[i + 1].focus();
+                }
+            });
+
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Backspace") {
+                    if (!input.value && i > 0) {
+                        kutu[i - 1].focus();
+                    }
+                }
+            });
+
+            input.addEventListener("focus", () => {
+                for (let j = 0; j < i; j++) {
+                    if (!kutu[j].value) {
+                        kutu[j].focus();
+                        break;
+                    }
+                }
+            });
+
+            kutu.push(input);
+            wrapper.appendChild(input);
+        }
+
+        wrapper.addEventListener("paste", (e) => {
+            e.preventDefault();
+            const data = e.clipboardData.getData("text").replace(/[^0-9]/g, "");
+
+            for (let i = 0; i < kutuSayisi; i++) {
+                kutu[i].value = data[i] || "";
+            }
+
+            const son = Math.min(data.length, kutuSayisi) - 1;
+            if (son >= 0) kutu[son].focus();
+        });
+
+        container.appendChild(wrapper);
+    }
+
+    function getCode(containerId) {
+        const kutu = document.querySelectorAll(`#${containerId} .otp-input`);
+
+        var kod = "";
+
+        for (let i = 0; i < kutu.length; i++) {
+            kod = kod + kutu[i].value;
+        }
+        
+
+        return kod;
+    }
+
+    createOtpInputs("codeBoxContainer", 6);
+</script>
